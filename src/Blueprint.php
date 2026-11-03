@@ -20,7 +20,7 @@ final class Blueprint
     /** @var list<string> */
     private array $commands = [];
 
-    private bool $isCreate = true;
+    public bool $isCreate = true;
 
     public function __construct(
         public readonly string $table,
