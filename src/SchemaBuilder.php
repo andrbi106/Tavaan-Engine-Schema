@@ -177,8 +177,8 @@ final class SchemaBuilder
     /**
      * introspect
      */
-    public function introspect()
+    public function introspect(string $table): array
     {
-        return null;
+        return $this->getColumns($table);
     }
 }

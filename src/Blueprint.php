@@ -234,36 +234,40 @@ final class Blueprint
     /**
      * column
      */
-    public function column()
+    public function column(string $name, string $type, ?int $length = null): ColumnDefinition
     {
-        return null;
+        return $this->addColumn($name, $type, $length);
     }
     /**
      * foreign
      */
-    public function foreign()
+    public function foreign(string $column): self
     {
-        return null;
+        $this->indexes[] = "FOREIGN KEY ({$column}) REFERENCES";
+        return $this;
     }
     /**
      * fullText
      */
-    public function fullText()
+    public function fullText(array|string $columns, ?string $name = null): void
     {
-        return null;
+        $cols = (array) $columns;
+        $idxName = $name ?? $this->table . "_" . implode("_", $cols) . "_fulltext";
+        $this->indexes[] = "FULLTEXT INDEX {$idxName} (" . implode(", ", $cols) . ")";
     }
     /**
      * primary
      */
-    public function primary()
+    public function primary(array|string $columns = "id"): void
     {
-        return null;
+        $cols = (array) $columns;
+        $this->indexes[] = "PRIMARY KEY (" . implode(", ", $cols) . ")";
     }
     /**
      * types
      */
-    public function types()
+    public function types(): array
     {
-        return null;
+        return array_unique(array_map(fn($col) => $col->type, $this->columns));
     }
 }
