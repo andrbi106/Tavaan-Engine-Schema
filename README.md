@@ -1,83 +1,60 @@
-# Schema
+# Tavaan Engine — Schema
 
-> تعریف ساختار دیتابیس با Blueprint (DDL Builder) برای MySQL/PostgreSQL/SQLite.
+> **ساختار دیتابیس** — موتور Schema در فریمورک تَوان
+
+## مشخصات
 
 | فیلد | مقدار |
-|------|------|
-| Engine ID | `tavaan.engine.schema` |
-| DOC-ID | `DOC-048` |
-| Namespace | `Tavaan\Engine\Database\Schema` |
-| اولویت | P0 (فاز M3) |
+|---|---|
+| شناسه | `tavaan.engine.schema` |
+| نام | `Schema` |
+| عنوان فارسی | ساختار دیتابیس |
+| نسخه | `0.1.0` |
+| namespace | `Tavaan\Engine\Database\Schema` |
+| نوع | `engine` |
 | Facade | `Schema` (accessor: `schema`) |
-| مخزن | https://github.com/andrbi106/Tavaan-Engine-Schema |
-| مستندات | https://github.com/Derogaramin/Tavaan-Doc/blob/main/docs/03-engines/schema.md
 
-## استفاده
+## کلاس‌های اصلی
 
-```php
-use Tavaan\Engine\Database\Schema\Blueprint;
-use Tavaan\Engine\Database\Schema\SchemaBuilder;
-use Tavaan\Engine\Database\Schema\SchemaManager;
-use Tavaan\Engine\Database\Connection;
+- `src/Blueprint.php`
+- `src/ColumnDefinition.php`
+- `src/SchemaBuilder.php`
+- `src/SchemaManager.php`
+- `src/SchemaServiceProvider.php`
 
-// مستقیم
-$conn = new Connection('sqlite::memory:');
-$schema = new SchemaBuilder($conn);
+## Service Providerها
 
-// Create
-$schema->create('users', function (Blueprint $t): void {
-    $t->id();
-    $t->string('name', 190);
-    $t->string('email')->unique();
-    $t->string('password');
-    $t->text('bio')->nullable();
-    $t->decimal('balance', 18, 4)->default(0);
-    $t->enum('status', ['active', 'banned'])->default('active');
-    $t->json('settings')->nullable();
-    $t->boolean('is_verified')->default(false);
-    $t->timestamps();
-    $t->softDeletes();
-    $t->index(['status', 'created_at']);
-});
+- `Tavaan\Engine\Database\Schema\SchemaServiceProvider`
 
-// Alter
-$schema->table('users', fn (Blueprint $t) => $t->string('phone', 20)->after('email'));
+## وابستگی‌ها
 
-// Drop
-$schema->drop('users');
-$schema->dropIfExists('users');
+**موتورهای مورد‌نیاز:**
 
-// Introspection
-$schema->hasTable('users');
-$schema->hasColumn('users', 'email');
-$schema->getTables();
-$schema->getColumns('users');
-$schema->getColumnType('users', 'name');
+- `database`
 
-// Rename
-$schema->rename('old_name', 'new_name');
+## پیکربندی
 
-// با SchemaManager (با ConnectionManager)
-$cm = new ConnectionManager([...]);
-$m = new SchemaManager([], $cm);
-$m->create('posts', fn($t) => $t->id()->string('title'));
-```
+- فایل پیکربندی: `config/schema.php`
+- کلید: `schema`
 
-## انواع ستون
-
-`id, ulid, uuid, integer, bigInteger, unsignedBigInteger, smallInteger, tinyInteger,
-string, text, longText, boolean, decimal, double, float, date, dateTime, timestamp,
-json, jsonb, enum, blob, binary, ipAddress, macAddress`
-
-## تست‌ها
+## نصب
 
 ```bash
-php bin/tvn test engines/schema
+git clone https://github.com/andrbi106/Tavaan-Engine-Schema.git
 ```
 
-## مستندات
+این موتور بخشی از فریمورک تَوان است و معمولاً به‌صورت مستقیم نصب نمی‌شود،
+بلکه توسط [Tavaan-Core](https://github.com/andrbi106/Tavaan-Core) مدیریت می‌شود.
 
-[docs/03-engines/schema.md](https://github.com/Derogaramin/Tavaan-Doc/blob/main/docs/03-engines/schema.md)
+## روابط با سایر مخازن
 
----
-*Generated on 2026-11-03.*
+| مخزن | نقش |
+|---|---|
+| **`andrbi106/Tavaan-Engine-Schema`** (این مخزن) | موتور Schema |
+| `andrbi106/Tavaan-Engine-Core` | ساختار پایه + درگاه ارتباط موتورها |
+| `andrbi106/Tavaan-Core` | اسکلت اپلیکیشن + همهٔ موتورها |
+| `Derogaramin/Tavaan-Framework` | فریمورک مادر (monorepo) |
+
+## مجوز
+
+MIT — هم‌راستا با فریمورک مادر تَوان.
