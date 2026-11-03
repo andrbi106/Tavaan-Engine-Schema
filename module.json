@@ -5,13 +5,30 @@
   "title_fa": "ساختار دیتابیس (Blueprint/DDL)",
   "version": "0.1.0",
   "namespace": "Tavaan\\Engine\\Database\\Schema\\",
-  "autoload": {"psr-4": {"Tavaan\\Engine\\Database\\Schema\\": "../database/src/Schema/"}},
-  "providers": ["Tavaan\\Engine\\Database\\Schema\\SchemaServiceProvider"],
-  "requires": {"php": ">=8.2", "engines": ["database"]},
-  "config": {"file": null, "key": null},
+  "autoload": {
+    "psr-4": {
+      "Tavaan\\Engine\\Database\\Schema\\": "src/"
+    }
+  },
+  "providers": [
+    "Tavaan\\Engine\\Database\\Schema\\SchemaBuilderServiceProvider"
+  ],
+  "requires": {
+    "php": ">=8.2",
+    "engines": [
+      "database"
+    ]
+  },
+  "config": {
+    "file": null,
+    "key": null
+  },
   "tables": [],
   "commands": [],
-  "facade": {"name": "Schema", "accessor": "schema"},
+  "facade": {
+    "name": "Schema",
+    "accessor": "schema"
+  },
   "docs": "docs/03-engines/schema.md",
   "notes": "کد در engines/database/src/Schema (namespace مطابق DOC-048 machine block)."
 }
