@@ -109,7 +109,10 @@ final class SchemaBuilder
         foreach ($bp->getIndexes() as $idx) {
             $parts[] = $idx;
         }
-        return "CREATE TABLE {$bp->getTable()} (\n  " . \implode(",\n  ", $parts) . "\n)";
+        return "CREATE TABLE {$bp->getTable()} (
+  " . \implode(",
+  ", $parts) . "
+)";
     }
 
     private function compileAlter(Blueprint $bp): string
