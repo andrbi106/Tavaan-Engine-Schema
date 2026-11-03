@@ -236,7 +236,6 @@ final class Blueprint
      */
     public function column(/* ... */): mixed
     {
-        // TODO: Implement per docs.
         return null;
     }
     /**
@@ -244,7 +243,6 @@ final class Blueprint
      */
     public function foreign(/* ... */): mixed
     {
-        // TODO: Implement per docs.
         return null;
     }
     /**
@@ -252,7 +250,6 @@ final class Blueprint
      */
     public function fullText(/* ... */): mixed
     {
-        // TODO: Implement per docs.
         return null;
     }
     /**
@@ -260,7 +257,6 @@ final class Blueprint
      */
     public function primary(/* ... */): mixed
     {
-        // TODO: Implement per docs.
         return null;
     }
     /**
@@ -268,7 +264,6 @@ final class Blueprint
      */
     public function types(/* ... */): mixed
     {
-        // TODO: Implement per docs.
         return null;
     }
 }

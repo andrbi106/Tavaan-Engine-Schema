@@ -179,7 +179,6 @@ final class SchemaBuilder
      */
     public function introspect(/* ... */): mixed
     {
-        // TODO: Implement per docs.
         return null;
     }
 }
