@@ -229,8 +229,7 @@ final class Blueprint
      */
     public function all(/* ... */): mixed
     {
-        // TODO: Implement per docs.
-        return null;
+        return array_merge($this->query->all(), $this->request->all());
     }
     /**
      * column
