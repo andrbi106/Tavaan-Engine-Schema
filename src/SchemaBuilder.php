@@ -4,110 +4,170 @@ declare(strict_types=1);
 
 namespace Tavaan\Engine\Database\Schema;
 
-use Tavaan\Core\Contracts\Config\RepositoryInterface as Config;
+use Tavaan\Engine\Database\Connection;
 
 /**
- * SchemaBuilder — پیاده‌سازی اصلی موتور.
+ * SchemaBuilder — اجرای Blueprint روی Connection.
  *
- * @see \Tavaan\Engine\Database\Schema\Contracts\SchemaBuilderInterface
+ * @see docs/03-engines/schema.md
  */
-final class SchemaBuilder implements Contracts\SchemaBuilderInterface
+final class SchemaBuilder
 {
-    /**
-     * @param Config $config پیکربندی موتور
-     */
     public function __construct(
-        private readonly Config $config,
+        private readonly Connection $connection,
     ) {
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function create(/* ... */): mixed
+    public function create(string $table, callable $callback): void
     {
-        // TODO: پیاده‌سازی create مطابق مستندات (سند §3 API).
-        return null;
+        $blueprint = new Blueprint($table);
+        $callback($blueprint);
+        $sql = $this->compileCreate($blueprint);
+        $this->connection->exec($sql);
+    }
+
+    public function table(string $table, callable $callback): void
+    {
+        $blueprint = new Blueprint($table);
+        $blueprint->isCreate = false;
+        $callback($blueprint);
+        $sql = $this->compileAlter($blueprint);
+        if ($sql !== '') {
+            $this->connection->exec($sql);
+        }
+    }
+
+    public function drop(string $table): void
+    {
+        $this->connection->exec("DROP TABLE {$table}");
+    }
+
+    public function dropIfExists(string $table): void
+    {
+        $this->connection->exec("DROP TABLE IF EXISTS {$table}");
+    }
+
+    public function rename(string $from, string $to): void
+    {
+        $this->connection->exec("ALTER TABLE {$from} RENAME TO {$to}");
+    }
+
+    public function hasTable(string $table): bool
+    {
+        $rows = $this->connection->select(
+            "SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?",
+            [$table]
+        );
+        return !empty($rows);
+    }
+
+    public function hasColumn(string $table, string $column): bool
+    {
+        try {
+            $rows = $this->connection->select("PRAGMA table_info({$table})");
+            foreach ($rows as $row) {
+                if (($row['name'] ?? '') === $column) return true;
+            }
+        } catch (\Throwable) {}
+        return false;
     }
 
     /**
-     * {@inheritdoc}
+     * @return list<string>
      */
-    public function table(/* ... */): mixed
+    public function getTables(): array
     {
-        // TODO: پیاده‌سازی table مطابق مستندات (سند §3 API).
-        return null;
+        $rows = $this->connection->select(
+            "SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name"
+        );
+        return \array_map(fn($r) => $r['name'], $rows);
     }
 
     /**
-     * {@inheritdoc}
+     * @return list<array{name: string, type: string}>
      */
-    public function drop(/* ... */): mixed
+    public function getColumns(string $table): array
     {
-        // TODO: پیاده‌سازی drop مطابق مستندات (سند §3 API).
+        $rows = $this->connection->select("PRAGMA table_info({$table})");
+        return \array_map(fn($r) => ['name' => $r['name'], 'type' => $r['type']], $rows);
+    }
+
+    public function getColumnType(string $table, string $column): ?string
+    {
+        foreach ($this->getColumns($table) as $col) {
+            if ($col['name'] === $column) return $col['type'];
+        }
         return null;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function dropIfExists(/* ... */): mixed
+    private function compileCreate(Blueprint $bp): string
     {
-        // TODO: پیاده‌سازی dropIfExists مطابق مستندات (سند §3 API).
-        return null;
+        $parts = [];
+        foreach ($bp->getColumns() as $col) {
+            $parts[] = $this->compileColumn($col);
+        }
+        foreach ($bp->getIndexes() as $idx) {
+            $parts[] = $idx;
+        }
+        return "CREATE TABLE {$bp->getTable()} (\n  " . \implode(",\n  ", $parts) . "\n)";
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function rename(/* ... */): mixed
+    private function compileAlter(Blueprint $bp): string
     {
-        // TODO: پیاده‌سازی rename مطابق مستندات (سند §3 API).
-        return null;
+        $parts = [];
+        foreach ($bp->getColumns() as $col) {
+            $parts[] = "ADD COLUMN " . $this->compileColumn($col);
+        }
+        foreach ($bp->getCommands() as $cmd) {
+            $parts[] = $cmd;
+        }
+        if (empty($parts)) return '';
+        return "ALTER TABLE {$bp->getTable()} " . \implode(', ', $parts);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function hasTable(/* ... */): mixed
+    private function compileColumn(ColumnDefinition $col): string
     {
-        // TODO: پیاده‌سازی hasTable مطابق مستندات (سند §3 API).
-        return null;
+        $type = $this->mapType($col);
+        $sql = "{$col->name} {$type}";
+        if ($col->autoIncrement) $sql .= ' PRIMARY KEY AUTOINCREMENT';
+        elseif ($col->primary) $sql .= ' PRIMARY KEY';
+        if ($col->nullable) $sql .= ' NULL';
+        else $sql .= ' NOT NULL';
+        if ($col->default !== null) {
+            $sql .= ' DEFAULT ' . $this->formatDefault($col->default);
+        }
+        if ($col->unique) $sql .= ' UNIQUE';
+        if ($col->comment !== null) $sql .= " -- {$col->comment}";
+        return $sql;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function hasColumn(/* ... */): mixed
+    private function mapType(ColumnDefinition $col): string
     {
-        // TODO: پیاده‌سازی hasColumn مطابق مستندات (سند §3 API).
-        return null;
+        return match ($col->type) {
+            'integer', 'smallInteger', 'tinyInteger' => 'INTEGER',
+            'bigInteger' => 'BIGINT' . ($col->unsigned ? ' UNSIGNED' : ''),
+            'string' => 'VARCHAR(' . ($col->length ?? 255) . ')',
+            'text', 'longText' => 'TEXT',
+            'boolean' => 'BOOLEAN',
+            'decimal' => "DECIMAL({$col->precision}, {$col->scale})",
+            'double' => 'DOUBLE',
+            'float' => 'REAL',
+            'date' => 'DATE',
+            'dateTime', 'timestamp' => 'DATETIME',
+            'json', 'jsonb' => 'TEXT',  // SQLite stores JSON as TEXT
+            'enum' => 'TEXT',  // SQLite doesn't have ENUM
+            'blob', 'binary' => 'BLOB',
+            'ipAddress', 'macAddress', 'uuid', 'ulid' => 'VARCHAR(255)',
+            default => 'TEXT',
+        };
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getColumns(/* ... */): mixed
+    private function formatDefault(mixed $value): string
     {
-        // TODO: پیاده‌سازی getColumns مطابق مستندات (سند §3 API).
-        return null;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getTables(/* ... */): mixed
-    {
-        // TODO: پیاده‌سازی getTables مطابق مستندات (سند §3 API).
-        return null;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function introspect(/* ... */): mixed
-    {
-        // TODO: پیاده‌سازی introspect مطابق مستندات (سند §3 API).
-        return null;
+        if ($value === null) return 'NULL';
+        if (\is_bool($value)) return $value ? '1' : '0';
+        if (\is_int($value) || \is_float($value)) return (string) $value;
+        if (\is_string($value)) return "'{$value}'";
+        return 'NULL';
     }
 }
