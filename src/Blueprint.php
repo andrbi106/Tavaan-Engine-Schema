@@ -227,42 +227,42 @@ final class Blueprint
     /**
      * all
      */
-    public function all(/* ... */): mixed
+    public function all()
     {
-        return array_merge($this->query->all(), $this->request->all());
+        return [];
     }
     /**
      * column
      */
-    public function column(/* ... */): mixed
+    public function column()
     {
         return null;
     }
     /**
      * foreign
      */
-    public function foreign(/* ... */): mixed
+    public function foreign()
     {
         return null;
     }
     /**
      * fullText
      */
-    public function fullText(/* ... */): mixed
+    public function fullText()
     {
         return null;
     }
     /**
      * primary
      */
-    public function primary(/* ... */): mixed
+    public function primary()
     {
         return null;
     }
     /**
      * types
      */
-    public function types(/* ... */): mixed
+    public function types()
     {
         return null;
     }

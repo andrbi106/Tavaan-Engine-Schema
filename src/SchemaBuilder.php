@@ -177,7 +177,7 @@ final class SchemaBuilder
     /**
      * introspect
      */
-    public function introspect(/* ... */): mixed
+    public function introspect()
     {
         return null;
     }
