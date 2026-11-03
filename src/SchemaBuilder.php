@@ -170,4 +170,13 @@ final class SchemaBuilder
         if (\is_string($value)) return "'{$value}'";
         return 'NULL';
     }
+
+    /**
+     * introspect
+     */
+    public function introspect(/* ... */): mixed
+    {
+        // TODO: Implement per docs.
+        return null;
+    }
 }

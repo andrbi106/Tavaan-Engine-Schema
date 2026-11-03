@@ -223,4 +223,53 @@ final class Blueprint
     {
         return $this->commands;
     }
+
+    /**
+     * all
+     */
+    public function all(/* ... */): mixed
+    {
+        // TODO: Implement per docs.
+        return null;
+    }
+    /**
+     * column
+     */
+    public function column(/* ... */): mixed
+    {
+        // TODO: Implement per docs.
+        return null;
+    }
+    /**
+     * foreign
+     */
+    public function foreign(/* ... */): mixed
+    {
+        // TODO: Implement per docs.
+        return null;
+    }
+    /**
+     * fullText
+     */
+    public function fullText(/* ... */): mixed
+    {
+        // TODO: Implement per docs.
+        return null;
+    }
+    /**
+     * primary
+     */
+    public function primary(/* ... */): mixed
+    {
+        // TODO: Implement per docs.
+        return null;
+    }
+    /**
+     * types
+     */
+    public function types(/* ... */): mixed
+    {
+        // TODO: Implement per docs.
+        return null;
+    }
 }
