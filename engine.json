@@ -10,11 +10,25 @@
       "Tavaan\\Engine\\Database\\Schema\\": "src/"
     }
   },
-  "providers": ["Tavaan\\Engine\\Database\\Schema\\SchemaServiceProvider"],
-  "requires": {"php": ">=8.2", "engines": ["database"]},
-  "config": {"file": "config/schema.php", "key": "schema"},
+  "providers": [
+    "Tavaan\\Engine\\Database\\Schema\\SchemaServiceProvider"
+  ],
+  "requires": {
+    "php": ">=8.2",
+    "engines": [
+      "database"
+    ]
+  },
+  "config": {
+    "file": "config/schema.php",
+    "key": "schema"
+  },
   "tables": [],
   "commands": [],
-  "facade": {"name": "Schema", "accessor": "schema"},
-  "docs": "docs/03-engines/schema.md"
+  "facade": {
+    "name": "Schema",
+    "accessor": "schema"
+  },
+  "docs": "docs/03-engines/schema.md",
+  "class": "Tavaan\\Engine\\Database\\Schema\\SchemaEngine"
 }

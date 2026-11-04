@@ -2,6 +2,8 @@
 
 > **ساختار دیتابیس** — موتور Schema در فریمورک تَوان
 
+این موتور از کلاس پایهٔ `Engine` (در [Tavaan-Engine-Core](https://github.com/andrbi106/Tavaan-Engine-Core)) ارث می‌برد.
+
 ## مشخصات
 
 | فیلد | مقدار |
@@ -11,49 +13,60 @@
 | عنوان فارسی | ساختار دیتابیس |
 | نسخه | `0.1.0` |
 | namespace | `Tavaan\Engine\Database\Schema` |
-| نوع | `engine` |
-| Facade | `Schema` (accessor: `schema`) |
+| کلاس موتور | `Tavaan\Engine\Database\Schema\SchemaEngine` |
+| Facade | Schema (`schema`) |
 
-## کلاس‌های اصلی
+## کلاس موتور
 
-- `src/Blueprint.php`
-- `src/ColumnDefinition.php`
-- `src/SchemaBuilder.php`
-- `src/SchemaManager.php`
-- `src/SchemaServiceProvider.php`
+```php
+namespace Tavaan\Engine\Database\Schema;
+
+use Tavaan\EngineCore\Engine as BaseEngine;
+use Tavaan\EngineCore\Contracts\EngineManifestInterface;
+
+final class SchemaEngine extends BaseEngine
+{
+    public function __construct(EngineManifestInterface $manifest)
+    {
+        parent::__construct($manifest);
+    }
+
+    public function register(ContainerInterface $container): void
+    {
+        parent::register($container);
+        // bindingهای اختصاصی موتور
+    }
+
+    public function boot(): void
+    {
+        parent::boot();
+    }
+}
+```
+
+**فایل:** `src/SchemaEngine.php`
+
+## وابستگی‌ها
+
+**موتورهای مورد‌نیاز:** `database`
 
 ## Service Providerها
 
 - `Tavaan\Engine\Database\Schema\SchemaServiceProvider`
 
-## وابستگی‌ها
+## سه درگاه ارتباط با سایر موتورها
 
-**موتورهای مورد‌نیاز:**
-
-- `database`
-
-## پیکربندی
-
-- فایل پیکربندی: `config/schema.php`
-- کلید: `schema`
+| درگاه | الگو | متدهای convenience |
+|---|---|---|
+| Container | pull-based DI | `make()`, `bound()` |
+| Events | pub/sub | `dispatch()`, `listen()` |
+| EngineBus | point-to-point RPC | `call()`, `offer()` |
 
 ## نصب
 
 ```bash
 git clone https://github.com/andrbi106/Tavaan-Engine-Schema.git
 ```
-
-این موتور بخشی از فریمورک تَوان است و معمولاً به‌صورت مستقیم نصب نمی‌شود،
-بلکه توسط [Tavaan-Core](https://github.com/andrbi106/Tavaan-Core) مدیریت می‌شود.
-
-## روابط با سایر مخازن
-
-| مخزن | نقش |
-|---|---|
-| **`andrbi106/Tavaan-Engine-Schema`** (این مخزن) | موتور Schema |
-| `andrbi106/Tavaan-Engine-Core` | ساختار پایه + درگاه ارتباط موتورها |
-| `andrbi106/Tavaan-Core` | اسکلت اپلیکیشن + همهٔ موتورها |
-| `Derogaramin/Tavaan-Framework` | فریمورک مادر (monorepo) |
 
 ## مجوز
 
